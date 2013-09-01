@@ -44,9 +44,4 @@ public class SimpleRestController {
 		return location;
 	}
 	
-	@RequestMapping(value="helloWorld", method=RequestMethod.GET)
-	@ResponseBody
-	public String helloWorld() {
-		return "Hello World !";
-	}
 }
