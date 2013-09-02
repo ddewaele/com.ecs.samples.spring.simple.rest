@@ -23,11 +23,11 @@ import com.google.api.services.oauth2.Oauth2;
 
 public class OAuth2Test {
 
-  private static final String API_URL = "http://localhost:6002/com.ecs.latify.api/locations";
+  private static final String API_URL = "http://localhost:6002/com.ecs.samples.spring.simple.rest/location";
 
-private static final String OAUTH_AUTH_URL = "http://localhost:6002/com.ecs.latify.api/oauth/authorize";
+private static final String OAUTH_AUTH_URL = "http://localhost:6002/com.ecs.samples.spring.simple.rest/oauth/authorize";
 
-private static final String OAUTH_TOKEN_URL = "http://localhost:6002/com.ecs.latify.api/oauth/token";
+private static final String OAUTH_TOKEN_URL = "http://localhost:6002/com.ecs.samples.spring.simple.rest/oauth/token";
 
 /** Directory to store user credentials. */
   private static final java.io.File DATA_STORE_DIR =
@@ -65,9 +65,6 @@ private static final String OAUTH_TOKEN_URL = "http://localhost:6002/com.ecs.lat
           + "into oauth2-cmdline-sample/src/main/resources/client_secrets.json");
       System.exit(1);
     }
-   
-    dataStoreFactory.getDataDirectory().delete();
-    System.out.println(dataStoreFactory.getDataDirectory());
    
     AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(BearerToken.authorizationHeaderAccessMethod() , 
         httpTransport, 
