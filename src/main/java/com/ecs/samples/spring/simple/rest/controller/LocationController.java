@@ -23,6 +23,12 @@ import com.ecs.samples.spring.simple.rest.model.Location;
 @RequestMapping("/location")
 public class LocationController {
 
+	private static final String QUERY_MAX_TIME = "max-time";
+
+	private static final String QUERY_MIN_TIME = "min-time";
+
+	private static final String APPLICATION_JSON = "application/json";
+
 	final Logger logger = LoggerFactory.getLogger(LocationController.class);
 	
 	private EntityManager em;
@@ -34,15 +40,31 @@ public class LocationController {
 	
 	
 	@Transactional
-	@RequestMapping(method=RequestMethod.POST,consumes = "application/json",produces= "application/json")
+	@RequestMapping(method=RequestMethod.POST,consumes = APPLICATION_JSON,produces= APPLICATION_JSON)
 	public @ResponseBody Location addLocation(@RequestBody Location location) {
-		logger.info("Saving location " + location);
-		em.persist(location);
-		em.flush();
+		Location locationFromDb = null;
+		if (location.getTimestampMs()!=null) {
+			locationFromDb = em.find(Location.class, location.getTimestampMs());
+		}
+		
+		if (locationFromDb!=null) {
+			logger.info("Updating location " + location);
+			locationFromDb.setAccuracy(location.getAccuracy());
+			locationFromDb.setAltitude((location.getAltitude()));
+			locationFromDb.setAltitudeAccuracy(location.getAltitudeAccuracy());
+			locationFromDb.setHeading(location.getHeading());
+			locationFromDb.setLatitude(location.getLatitude());
+			locationFromDb.setLongitude(location.getLongitude());
+			locationFromDb.setSpeed(location.getSpeed());
+		} else {
+			logger.info("Saving location " + location);
+			em.persist(location);
+		}
+		
 		return location;
 	}
 	
-	@RequestMapping(value="{timestamp}",method=RequestMethod.GET,produces= "application/json")
+	@RequestMapping(value="{timestamp}",method=RequestMethod.GET,produces= APPLICATION_JSON)
 	public @ResponseBody Location getLocation(@PathVariable Long timestamp) {
 		logger.info("Findign location with Timestamp = " + timestamp);
 		Location location = em.find(Location.class, timestamp);
@@ -50,8 +72,8 @@ public class LocationController {
 		return location;
 	}
 	
-	@RequestMapping(method=RequestMethod.GET,produces= "application/json")
-	public @ResponseBody List<Location> getLocations(@RequestParam(value="min-time",required=false) Long minTime,@RequestParam(value="max-time",required=false) Long maxTime) {
+	@RequestMapping(method=RequestMethod.GET,produces= APPLICATION_JSON)
+	public @ResponseBody List<Location> getLocations(@RequestParam(value=QUERY_MIN_TIME,required=false) Long minTime,@RequestParam(value=QUERY_MAX_TIME,required=false) Long maxTime) {
 		logger.info("Finding locations with min-time = {} and max-time = {}",minTime,maxTime);
 		String sql = "SELECT l FROM Location l";
 		
