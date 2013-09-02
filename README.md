@@ -15,6 +15,7 @@ http://localhost:6002/com.ecs.samples.spring.simple.rest/helloWorld
 	export host=localhost
 	export port=6002
 	export location_endpoint=http://${host}:${port}/com.ecs.samples.spring.simple.rest/location
+	export current_location_endpoint=http://${host}:${port}/com.ecs.samples.spring.simple.rest/currentlocation
 
 # Changes 
 
@@ -75,7 +76,8 @@ This is added in the META-INF folder of the package that holds the Entity classe
 # Testing
 
 ## Retrieving locations
-	curl --silent ${location_endpoint}
+	curl --silent "${location_endpoint}"
+	curl --silent "${location_endpoint}/?min-time=1378111961098&max-time=1378111963779"
 
 ## Register a location 
 	curl --silent  -H "Content-Type: application/json" -d '{"latitude":10.123,"longitude":45.32323}' -X POST ${location_endpoint}

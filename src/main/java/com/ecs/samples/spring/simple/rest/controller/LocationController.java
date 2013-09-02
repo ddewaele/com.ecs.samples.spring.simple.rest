@@ -21,9 +21,9 @@ import com.ecs.samples.spring.simple.rest.model.Location;
 
 @Controller
 @RequestMapping("/location")
-public class SimpleRestController {
+public class LocationController {
 
-	final Logger logger = LoggerFactory.getLogger(SimpleRestController.class);
+	final Logger logger = LoggerFactory.getLogger(LocationController.class);
 	
 	private EntityManager em;
 	
@@ -36,8 +36,6 @@ public class SimpleRestController {
 	@Transactional
 	@RequestMapping(method=RequestMethod.POST,consumes = "application/json",produces= "application/json")
 	public @ResponseBody Location addLocation(@RequestBody Location location) {
-		long currentTimeMillis = System.currentTimeMillis();
-		location.setTimestampMs(currentTimeMillis);
 		logger.info("Saving location " + location);
 		em.persist(location);
 		em.flush();
