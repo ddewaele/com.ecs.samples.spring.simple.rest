@@ -17,6 +17,24 @@ http://localhost:6002/com.ecs.samples.spring.simple.rest/helloWorld
 	export location_endpoint=http://${host}:${port}/com.ecs.samples.spring.simple.rest/location
 	export current_location_endpoint=http://${host}:${port}/com.ecs.samples.spring.simple.rest/currentLocation
 
+### System properties
+
+	export MAVEN_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=/tmp"
+	mvn tomcat:run
+
+in windows :
+
+	set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=C:/TEMP
+
+
+### local oauth data
+
+The Oauth2Test class stores its tokens in the following location:
+
+	rm -rf ~/.store/oauth2_sample/StoredCredential 
+
+
+
 # Changes 
 
 ## Spring context

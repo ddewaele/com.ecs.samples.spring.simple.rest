@@ -42,6 +42,24 @@
 	
 	<jdbc:embedded-database id="dataSource" type="HSQL" />    	
 	
+	
+	<!-- 
+	Our token URL deserves some special attention here. Not that it uses a specific authentication manager.
+	
+	We're using the clientAuthenticationManager because the ClientCredentialsTokenEndpointFilter is responsible
+	for extracting the client_id and client_secret from the request (stored their as request params)
+	So in this case, the authentication being done here is not the user-authentication, but the client-id-authentication.
+	It will very if the clientid and clientsecret matces.
+	
+	 
+	
+	
+	The "IS_AUTHENTICATED_FULLY" authenticated option means the user is authenticated fully 
+	(i.e. AuthenticationTrustResolver.isAnonymous(Authentication) is false and AuthenticationTrustResolver.isRememberMe(Authentication) is false).	
+	
+	TODO: find out why we need to have an http-basic element here
+	 
+	 -->
 	<http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="clientAuthenticationManager"
 		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
