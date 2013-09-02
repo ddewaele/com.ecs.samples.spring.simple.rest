@@ -3,17 +3,33 @@ package com.ecs.samples.spring.simple.rest.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.google.api.client.util.Key;
+
 @Entity
 public class Location {
 	
+	@Key
 	private Integer accuracy;
+	
+	@Key
 	private Integer altitude;
+	
+	@Key
 	private Integer altitudeAccuracy;
+	
+	@Key
 	private Integer heading;
+	
+	@Key
 	private Double latitude;
+	
+	@Key
 	private Double longitude;
+	
+	@Key
 	private Double speed;
 	
+	@Key
 	@Id
 	private Long timestampMs;
 	
