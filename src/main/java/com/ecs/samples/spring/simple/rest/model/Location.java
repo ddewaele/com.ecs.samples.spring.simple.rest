@@ -88,6 +88,15 @@ public class Location {
 	public void setTimestampMs(Long timestampMs) {
 		this.timestampMs = timestampMs;
 	}
+
+	@Override
+	public String toString() {
+		return "Location [accuracy=" + accuracy + ", altitude=" + altitude
+				+ ", altitudeAccuracy=" + altitudeAccuracy + ", heading="
+				+ heading + ", latitude=" + latitude + ", longitude="
+				+ longitude + ", speed=" + speed + ", timestampMs="
+				+ timestampMs + "]";
+	}
 	
 	
 }
