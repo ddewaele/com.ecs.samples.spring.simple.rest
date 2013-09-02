@@ -326,6 +326,13 @@ You need to setup an authorization-server
 		<oauth:password />
 	</oauth:authorization-server>
 
+- Insufficient scope
+
+403 Forbidden
+{"error":"insufficient_scope","error_description":"Insufficient scope for this resource","scope":"LOCATION"}
+
+Make sure you provide the correct scopes...
+
 # References
 
 ## Security
