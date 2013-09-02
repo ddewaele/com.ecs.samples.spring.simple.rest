@@ -73,6 +73,53 @@ This is added in the META-INF folder of the package that holds the Entity classe
 	<jdbc:embedded-database id="dataSource" type="HSQL" />    
 	
 	
+# OAuth2
+
+## Spring Context setup
+
+### Protected URLS
+
+	<http pattern="/locations/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/locations" access="ROLE_USER,SCOPE_READ" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
+	
+
+In order for the protective urls to work we need to define a OAuth2AuthenticationEntryPoint. This is capable of delivering a reaml in case of an unauthorized error.
+That way the client will be informed.
+	
+	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+		<property name="realmName" value="sparklr2" />
+	</bean>
+	
+
+We also need to define an accessDecisionManager, capable of making a final access control (authorization) decision
+
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased" xmlns="http://www.springframework.org/schema/beans">
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter" />
+				<bean class="org.springframework.security.access.vote.RoleVoter" />
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+
+
+### Client Details Service
+
+We start by creating a client details service that will list all of our OAuth clients
+
+	<oauth:client-details-service id="clientDetails">
+		<oauth:client client-id="my-trusted-client" authorized-grant-types="password,authorization_code,refresh_token,implicit"
+			secret="somesecret"  authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" access-token-validity="60" />
+	</oauth:client-details-service>
+		
+	
 # Testing
 
 ## Current locations
