@@ -79,6 +79,11 @@ This is added in the META-INF folder of the package that holds the Entity classe
 
 ## Register a location 
 	curl --silent  -H "Content-Type: application/json" -d '{"latitude":10.123,"longitude":45.32323}' -X POST ${location_endpoint}
+	
+	curl --silent  -H "Content-Type: application/json" -d '{"latitude":1.0,"longitude":1.0}' -X POST ${location_endpoint}
+	curl --silent  -H "Content-Type: application/json" -d '{"latitude":2.0,"longitude":2.0}' -X POST ${location_endpoint}
+	curl --silent  -H "Content-Type: application/json" -d '{"latitude":3.0,"longitude":3.0}' -X POST ${location_endpoint}
+	curl --silent  -H "Content-Type: application/json" -d '{"latitude":4.0,"longitude":4.0}' -X POST ${location_endpoint}			
 
 # Errors occured
 
