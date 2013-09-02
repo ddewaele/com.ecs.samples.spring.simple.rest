@@ -93,19 +93,24 @@ This is added in the META-INF folder of the package that holds the Entity classe
 ## Retrieving location history
 
 	curl --silent "${location_endpoint}"
+	curl --silent "${location_endpoint}/1378113390550"
+	
 	curl --silent "${location_endpoint}/?min-time=1378111961098&max-time=1378111963779"
 
-## Register a location 
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":10.123,"longitude":45.32323}' -X POST ${location_endpoint}
+## Add past locations
+
+
 	
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":1.0,"longitude":1.0}' -X POST ${location_endpoint}
+
+	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":10.0,"longitude":10.0,"speed":null,"timestampMs":1378112866695}' -X POST ${location_endpoint}
 	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":2.0,"longitude":2.0}' -X POST ${location_endpoint}
+	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":20.0,"longitude":20.0,"speed":null,"timestampMs":1378112869730}' -X POST ${location_endpoint}
 	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":3.0,"longitude":3.0}' -X POST ${location_endpoint}
+	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":30.0,"longitude":30.0,"speed":null,"timestampMs":1378112872770}' -X POST ${location_endpoint}
 	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":4.0,"longitude":4.0}' -X POST ${location_endpoint}
-	sleep 1			
+	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":40.0,"longitude":40.0,"speed":null,"timestampMs":1378113390550}' -X POST ${location_endpoint}
+	sleep 1
+
 
 # Errors occured
 
