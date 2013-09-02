@@ -60,6 +60,22 @@
 			<version>${spring.version}</version>
 		</dependency>
 		
+		 <dependency>
+		      <groupId>com.google.apis</groupId>
+		      <artifactId>google-api-services-oauth2</artifactId>
+		      <version>v2-rev43-1.16.0-rc</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>com.google.http-client</groupId>
+	      <artifactId>google-http-client-jackson2</artifactId>
+	      <version>${project.http.version}</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>com.google.oauth-client</groupId>
+	      <artifactId>google-oauth-client-jetty</artifactId>
+	      <version>${project.oauth.version}</version>
+	    </dependency>
+		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
@@ -109,11 +125,11 @@
 			<scope>runtime</scope>
 		</dependency>	
 		
-<dependency>
-	<groupId>org.slf4j</groupId>
-	<artifactId>slf4j-api</artifactId>
-	<version>${org.slf4j.version}</version>
-</dependency>
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>${org.slf4j.version}</version>
+	</dependency>
 	<dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
@@ -139,5 +155,8 @@
      <spring.version>3.2.3.RELEASE</spring.version>
      <hibernate.version>4.2.2.Final</hibernate.version>
      <org.slf4j.version>1.7.5</org.slf4j.version>
+	<project.http.version>1.16.0-rc</project.http.version>
+	<project.oauth.version>1.16.0-rc</project.oauth.version>
+     
   </properties>  
 </project>
