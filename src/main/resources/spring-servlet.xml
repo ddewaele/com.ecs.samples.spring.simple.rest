@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:oauth="http://www.springframework.org/schema/security/oauth2" xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2" 
+	xmlns:sec="http://www.springframework.org/schema/security"
 	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
@@ -20,6 +21,7 @@
     <context:annotation-config />
     <context:component-scan base-package="com.ecs.samples.spring"/>
 	<mvc:annotation-driven />
+	<mvc:default-servlet-handler />
 	<tx:annotation-driven/>
 
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -39,5 +41,154 @@
 	</bean>
 	
 	<jdbc:embedded-database id="dataSource" type="HSQL" />    	
+	
+	
+	<!-- 
+	Our token URL deserves some special attention here. Not that it uses a specific authentication manager.
+	
+	We're using the clientAuthenticationManager because the ClientCredentialsTokenEndpointFilter is responsible
+	for extracting the client_id and client_secret from the request (stored their as request params)
+	So in this case, the authentication being done here is not the user-authentication, but the client-id-authentication.
+	It will very if the clientid and clientsecret matces.
+	
+	 
+	
+	
+	The "IS_AUTHENTICATED_FULLY" authenticated option means the user is authenticated fully 
+	(i.e. AuthenticationTrustResolver.isAnonymous(Authentication) is false and AuthenticationTrustResolver.isRememberMe(Authentication) is false).	
+	
+	TODO: find out why we need to have an http-basic element here
+	 
+	 -->
+	<http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="clientAuthenticationManager"
+		xmlns="http://www.springframework.org/schema/security">
+		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
+		<anonymous enabled="false" />
+		<http-basic entry-point-ref="clientAuthenticationEntryPoint" />
+		<!-- include this only if you need to authenticate clients via request parameters -->
+		<custom-filter ref="clientCredentialsTokenEndpointFilter" after="BASIC_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
+	
+	<bean id="clientAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+		<property name="realmName" value="com.ecs.latify.api/client" />
+		<property name="typeName" value="Basic" />
+	</bean>
+	
+	<sec:authentication-manager id="clientAuthenticationManager">
+		<sec:authentication-provider user-service-ref="clientDetailsUserService" />
+	</sec:authentication-manager>
+ 		
+	<bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
+		<property name="authenticationManager" ref="clientAuthenticationManager" />
+	</bean>
+		
+		
+	<http pattern="/location/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/location" access="ROLE_USER,SCOPE_LOCATIONHISTORY" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
+	
+	<http pattern="/currentLocation/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/currentLocation" access="ROLE_USER,SCOPE_LOCATION" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>	
+	
+	<http access-denied-page="/login.jsp?authorization_error=true" disable-url-rewriting="true"
+		xmlns="http://www.springframework.org/schema/security">
+		<intercept-url pattern="/oauth/**" access="ROLE_USER" />
+		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 
+		<form-login authentication-failure-url="/login.jsp?authentication_error=true" default-target-url="/index.jsp"
+			login-page="/login.jsp" login-processing-url="/login.do" />
+		<logout logout-success-url="/index.jsp" logout-url="/logout.do" />
+		<anonymous />
+	</http>	
+	
+	<bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+	
+	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+		<property name="realmName" value="sparklr2" />
+	</bean>	
+	
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter" />
+				<bean class="org.springframework.security.access.vote.RoleVoter" />
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<oauth:resource-server id="resourceServerFilter" resource-id="latifyApi" token-services-ref="tokenServices" />
+ 	
+	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+		<property name="tokenStore" ref="tokenStore" />
+		<property name="supportRefreshToken" value="true" />
+		<property name="clientDetailsService" ref="clientDetails" />
+	</bean>
+	
+	<oauth:client-details-service id="clientDetails">
+		<oauth:client client-id="my-trusted-client" authorized-grant-types="password,authorization_code,refresh_token,implicit"
+			secret="somesecret"  authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="location,locationhistory" access-token-validity="60" />
+	</oauth:client-details-service>
+	
+	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+
+		
+
+	<sec:authentication-manager alias="authenticationManager">
+		<sec:authentication-provider>
+			<sec:user-service id="userDetailsService">
+				<sec:user name="marissa" password="koala" authorities="ROLE_USER" />
+				<sec:user name="paul" password="emu" authorities="ROLE_USER" />
+			</sec:user-service>
+		</sec:authentication-provider>
+	</sec:authentication-manager>	
+		
+	<bean id="clientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
+		<constructor-arg ref="clientDetails" />
+	</bean>
+		
+	<oauth:authorization-server 
+	    client-details-service-ref="clientDetails" 
+	    token-services-ref="tokenServices"
+		user-approval-handler-ref="userApprovalHandler">
+		<oauth:authorization-code />
+		<oauth:implicit />
+		<oauth:refresh-token />
+		<oauth:client-credentials />
+		<oauth:password />
+	</oauth:authorization-server>
+ 
+
+	<bean id="userApprovalHandler" class="com.ecs.samples.spring.simple.rest.controller.SimpleUserApprovalHandler">
+		<property name="autoApproveClients">
+			<set>
+				<value>my-less-trusted-autoapprove-client</value>
+			</set>
+		</property>
+		<property name="tokenServices" ref="tokenServices" />
+	</bean>	
+	
+	
+	
+	<sec:global-method-security pre-post-annotations="enabled" proxy-target-class="true">
+		<sec:expression-handler ref="oauthExpressionHandler" />
+	</sec:global-method-security>
+
+	<oauth:expression-handler id="oauthExpressionHandler" />
+	<oauth:web-expression-handler id="oauthWebExpressionHandler" />
+	
+
+
+	
+	
 </beans>
