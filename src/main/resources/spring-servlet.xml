@@ -153,7 +153,9 @@
 			secret="somesecret"  authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="location,locationhistory" access-token-validity="60" />
 	</oauth:client-details-service>
 	
-	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.JdbcTokenStore">
+		<constructor-arg ref="dataSource" />
+	</bean>
 
 <!-- 	<sec:authentication-manager alias="authenticationManager"> -->
 <!-- 		<sec:authentication-provider> -->
