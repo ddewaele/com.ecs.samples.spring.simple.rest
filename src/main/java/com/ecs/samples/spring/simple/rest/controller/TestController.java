@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.common.util.SerializationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -63,18 +66,28 @@ public class TestController {
 		logger.info(" ------------------------------------------- ");
 		Iterable<OAuthRefreshToken> refreshTokens = oAuthRefreshTokenRepository.findAll();
 		for (OAuthRefreshToken oAuthRefreshToken : refreshTokens) {
+			OAuth2RefreshToken refreshToken =SerializationUtils.deserialize(oAuthRefreshToken.getToken());
 			logger.info("Found refresh token " + oAuthRefreshToken);
+			logger.info("Found deserialized token " + refreshToken);
 		}
 		
 		logger.info(" ------------------------------------------- ");
-		logger.info("looping refresh tokens");
+		logger.info("looping access tokens");
 		logger.info(" ------------------------------------------- ");
 		Iterable<OAuthAccessToken> accessTokens = oAuthAccessTokenRepository.findAll();
 		for (OAuthAccessToken oAuthAccessToken : accessTokens) {
+			OAuth2AccessToken accessToken = deserializeAccessToken(oAuthAccessToken.getToken());
+			Object deserialize = SerializationUtils.deserialize(oAuthAccessToken.getAuthentication());
 			logger.info("Found access token " + oAuthAccessToken);
+			logger.info("Found deserialized token " + accessToken);
+			logger.info("Found deserialized auth" + deserialize);
+			
 		}
 
 		return "OK";
 	}
 
+	private OAuth2AccessToken deserializeAccessToken(byte[] token) {
+		return SerializationUtils.deserialize(token);
+	}
 }
