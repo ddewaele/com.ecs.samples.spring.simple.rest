@@ -1,11 +1,15 @@
 package com.ecs.samples.spring.simple.rest.controller;
 
+import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ecs.samples.spring.simple.rest.model.Location;
+import com.ecs.samples.spring.simple.rest.repository.OAuthAccessTokenRepository;
+import com.ecs.samples.spring.simple.rest.repository.OAuthRefreshTokenRepository;
+import com.ecs.samples.spring.simple.rest.repository.UserRepository;
 
 @Controller
 @RequestMapping("/currentLocation")
@@ -27,6 +34,15 @@ public class CurrentLocationController {
 	
 	private EntityManager em;
 	
+	@Resource
+	UserRepository simpleUserRepository;
+	
+	@Resource
+	OAuthAccessTokenRepository oAuthAccessTokenRepository;
+	
+	@Resource
+	OAuthRefreshTokenRepository oAuthRefreshTokenRepository;
+	
 	@PersistenceContext
 	public void setEntityManager(EntityManager em) {
 		this.em = em;
@@ -35,6 +51,7 @@ public class CurrentLocationController {
 	@Transactional
 	@RequestMapping(method=RequestMethod.POST,consumes = APPLICATION_JSON,produces= APPLICATION_JSON)
 	public @ResponseBody Location updateCurrentLocation(@RequestBody Location location) {
+		logger.info("Entering method with location " + location);
 		long currentTimeMillis = System.currentTimeMillis();
 		location.setTimestampMs(currentTimeMillis);
 		logger.info("Saving location " + location);

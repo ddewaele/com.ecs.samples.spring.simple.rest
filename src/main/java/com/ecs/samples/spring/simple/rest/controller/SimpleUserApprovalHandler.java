@@ -3,12 +3,16 @@ package com.ecs.samples.spring.simple.rest.controller;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.approval.TokenServicesUserApprovalHandler;
 
 public class SimpleUserApprovalHandler extends TokenServicesUserApprovalHandler {
 
+	final Logger logger = LoggerFactory.getLogger(SimpleUserApprovalHandler.class);
+	
 	private Collection<String> autoApproveClients = new HashSet<String>();
 	
 	private boolean useTokenServices = true;
@@ -43,6 +47,8 @@ public class SimpleUserApprovalHandler extends TokenServicesUserApprovalHandler 
 	@Override
 	public boolean isApproved(AuthorizationRequest authorizationRequest, Authentication userAuthentication) {
 	
+		logger.info(" ++++++++++++++++++++++++++++++++++ isApproved called");
+		
 		// If we are allowed to check existing approvals this will short circuit the decision
 		if (useTokenServices && super.isApproved(authorizationRequest, userAuthentication)) {
 			return true;

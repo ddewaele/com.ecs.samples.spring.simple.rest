@@ -27,69 +27,64 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-
 
 @Entity
 @Table(name = "users")
+@NamedQuery(name = "User.findByTheEmail", query = "from User u where u.email= ?1")
 @SuppressWarnings("serial")
-public class User implements Serializable
-{
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
-    
-    private String email;
-    private String password;
-    private boolean registered;
-    
-    
+public class User implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Integer id;
+
+	private String email;
+	private String password;
+	private boolean registered;
+
 	private String authority = "user";
-    
-     
-    public User()
-    {
-    }
-    
-    public User(String email) {
-    	this.email = email;
-    }
 
-    public Integer getId()
-    {
-        return this.id;
-    }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-    
-    public String getEmail() {
-		return email;
+	public User() {
 	}
-    
-    public void setEmail(String email) {
+
+	public User(String email) {
 		this.email = email;
 	}
 
-    public String getPassword() {
+	public Integer getId() {
+		return this.id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPassword() {
 		return password;
 	}
-    
-    public void setPassword(String password) {
+
+	public void setPassword(String password) {
 		this.password = password;
 	}
-    
-    public String getAuthority() {
+
+	public String getAuthority() {
 		return authority;
 	}
-    
-    public void setAuthority(String authority) {
+
+	public void setAuthority(String authority) {
 		this.authority = authority;
 	}
- 
-    public boolean isRegistered() {
+
+	public boolean isRegistered() {
 		return registered;
 	}
 
@@ -97,9 +92,10 @@ public class User implements Serializable
 		this.registered = registered;
 	}
 
-    @Override
-    public String toString() {
-    	return "[User:" + this.id + "|" + this.email + "|" + this.password + "|" +  this.authority + "]";
-    }
-    
+	@Override
+	public String toString() {
+		return "[User:" + this.id + "|" + this.email + "|" + this.password
+				+ "|" + this.authority + "]";
+	}
+
 }
