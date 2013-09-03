@@ -246,13 +246,13 @@ For this sample we're simply using an in-memory implementation.
 
 ### Client Details Service
 
-We start by creating a client details service that will list all of our OAuth clients
+We start by creating a client details service that will list all of our OAuth clients. These include the `client id` and `client secret` that your API clients need to provide in order to initiate an Oauth flow.
+At the moment we maintain a simple static list inside the spring context, but this could be replaced with a more dynamic administrative system where new clients can be registered through a web page.
 
 	<oauth:client-details-service id="clientDetails">
 		<oauth:client client-id="my-trusted-client" authorized-grant-types="password,authorization_code,refresh_token,implicit"
 			secret="somesecret"  authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" access-token-validity="60" />
 	</oauth:client-details-service>
-		
 	
 # Testing
 

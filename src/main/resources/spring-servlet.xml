@@ -51,9 +51,6 @@
 	So in this case, the authentication being done here is not the user-authentication, but the client-id-authentication.
 	It will very if the clientid and clientsecret matces.
 	
-	 
-	
-	
 	The "IS_AUTHENTICATED_FULLY" authenticated option means the user is authenticated fully 
 	(i.e. AuthenticationTrustResolver.isAnonymous(Authentication) is false and AuthenticationTrustResolver.isRememberMe(Authentication) is false).	
 	
@@ -78,7 +75,11 @@
 	<sec:authentication-manager id="clientAuthenticationManager">
 		<sec:authentication-provider user-service-ref="clientDetailsUserService" />
 	</sec:authentication-manager>
- 		
+	
+	<bean id="clientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
+		<constructor-arg ref="clientDetails" />
+	</bean>
+		
 	<bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
 		<property name="authenticationManager" ref="clientAuthenticationManager" />
 	</bean>
@@ -152,10 +153,6 @@
 			</sec:user-service>
 		</sec:authentication-provider>
 	</sec:authentication-manager>	
-		
-	<bean id="clientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
-		<constructor-arg ref="clientDetails" />
-	</bean>
 		
 	<oauth:authorization-server 
 	    client-details-service-ref="clientDetails" 
