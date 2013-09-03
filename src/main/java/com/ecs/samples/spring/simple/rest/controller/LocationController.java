@@ -23,6 +23,8 @@ import com.ecs.samples.spring.simple.rest.model.Location;
 @RequestMapping("/location")
 public class LocationController {
 
+	private static final int MAX_RESULTS = 1000;
+
 	private static final String QUERY_MAX_TIME = "max-time";
 
 	private static final String QUERY_MIN_TIME = "min-time";
@@ -87,7 +89,7 @@ public class LocationController {
 			}
 		}
 		Query query = em.createQuery(sql);
-		List<Location> resultList = query.setMaxResults(1000).getResultList();
+		List<Location> resultList = query.setMaxResults(MAX_RESULTS).getResultList();
 		return resultList;
 	}
 	
