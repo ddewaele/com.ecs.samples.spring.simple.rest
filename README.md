@@ -295,18 +295,25 @@ We start by creating a client details service that will list all of our OAuth cl
 
 # Errors occured
 
+
+## Spring MVC errors 
+
+TODO : try to reproduce.
+
 - The request sent by the client was syntactically incorrect ().
 (This was caused by invalid JSON being sent - attribute names were not encapsulated in quotes)
 - The server refused this request because the request entity is in a format not supported by the requested resource for the requested method ().
 - The resource identified by this request is only capable of generating responses with characteristics not acceptable according to the request "accept" headers ().
 
-- An error occured when the oauth2 authorization was hit.
+## Oauth2 Authorization URL error
 
-OAuth2 Authorization URL : 
+### Description
+
+An error occured when the oauth2 authorization was hit.
 
 	http://localhost:6002/com.ecs.samples.spring.simple.rest/oauth/authorize?client_id=my-trusted-client&redirect_uri=http://localhost:50577/Callback&response_type=code&scope=read%20write%20trust
 
-Error
+Full stack trace
 
 	org.springframework.security.authentication.InsufficientAuthenticationException: User must be authenticated with Spring Security before authorization can be completed.
 		org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint.authorize(AuthorizationEndpoint.java:145)
@@ -332,6 +339,8 @@ Error
 		org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:346)
 		org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:259)
 
+## Solution
+
 This means that we didn't enter the Oauth authorization flow with an authenticated user.
 Keep in mind that as you are authorizating an application access to your data, you need to have 
 a logged in user at this point.
@@ -352,7 +361,11 @@ In this sample, we're using a simple form based login.
 	</http>
 
 
-- After the user clicks authorize, we receive the authorization code but fail to swap it for a token.
+## Failure after capturing authorization code
+
+### Description
+
+After the user clicks authorize, we receive the authorization code but fail to swap it for a token.
 
 This is because the oauth token url is not properly setup 
 
@@ -383,10 +396,15 @@ We need to have the following beans in place
 		<property name="authenticationManager" ref="clientAuthenticationManager" />
 	</bean>
 		
+## authenticationManager not defined.
 
-- No bean named 'org.springframework.security.authenticationManager' is defined
+### Error message  
 
-The following error occurs if you don't have an authenticaiton provider in your Spring Context.
+No bean named 'org.springframework.security.authenticationManager' is defined
+
+### Description
+
+The following error occurs if you don't have an authentication provider in your Spring Context.
 
 	org.springframework.beans.factory.NoSuchBeanDefinitionException: 
 	No bean named 'org.springframework.security.authenticationManager' is defined: 
@@ -394,9 +412,33 @@ The following error occurs if you don't have an authenticaiton provider in your 
 	(with child <authentication-provider> elements)? 
 	Alternatively you can use the authentication-manager-ref attribute on your <http> and <global-method-security> elements.
 
-- Oauth2 authorization page not available
+### Solution
 
-http://localhost:6002/com.ecs.samples.spring.simple.rest/oauth/authorize?client_id=my-trusted-client&redirect_uri=http://localhost:51122/Callback&response_type=code&scope=read%20write%20trust
+In order to solve this you need to have an `authentication-manager` defined with one or more `authentication-provider` elements.
+In this case we;re using a very simple user service that defines the users in a status way.
+
+	<sec:authentication-manager alias="authenticationManager">
+		<sec:authentication-provider>
+			<sec:user-service id="userDetailsService">
+				<sec:user name="marissa" password="koala" authorities="ROLE_USER" />
+				<sec:user name="paul" password="emu" authorities="ROLE_USER" />
+			</sec:user-service>
+		</sec:authentication-provider>
+	</sec:authentication-manager>	
+
+## Oauth2 authorization page not available
+
+## Error message
+
+HTTP 404 when going to the oauth authorization url.
+
+### Description
+
+Part of the OAuth32 flow is the authorization flow, where the user will need to allow a third party app to access his data. This is typically handled through an authorization page. For this particular error the authorization page doesn't pop. 
+
+	http://localhost:6002/com.ecs.samples.spring.simple.rest/oauth/authorize?client_id=my-trusted-client&redirect_uri=http://localhost:51122/Callback&response_type=code&scope=read%20write%20trust
+
+### Solution
 
 You need to setup an authorization-server
 
@@ -411,12 +453,17 @@ You need to setup an authorization-server
 		<oauth:password />
 	</oauth:authorization-server>
 
-- Insufficient scope
+## Insufficient scope
 
-403 Forbidden
-{"error":"insufficient_scope","error_description":"Insufficient scope for this resource","scope":"LOCATION"}
+## Error message
 
-Make sure you provide the correct scopes...
+HTTP 403 Forbidden occurs when trying to access the API
+
+	{"error":"insufficient_scope","error_description":"Insufficient scope for this resource","scope":"LOCATION"}
+
+## Solution
+
+Make sure you provide the correct scopes.. (elaborate(.
 
 # References
 
