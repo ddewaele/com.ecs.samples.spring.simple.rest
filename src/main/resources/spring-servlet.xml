@@ -34,6 +34,11 @@
 				<property name="database" value="HSQL" />
 			</bean>
 		</property>
+		<property name="jpaProperties">
+      		<props>
+        		<prop key="hibernate.hbm2ddl.auto">create</prop>
+        	</props>
+        </property>		
 	</bean>
 	
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
@@ -55,8 +60,7 @@
 	(i.e. AuthenticationTrustResolver.isAnonymous(Authentication) is false and AuthenticationTrustResolver.isRememberMe(Authentication) is false).	
 	
 	TODO: find out why we need to have an http-basic element here
-	 
-	 -->
+	-->
 	<http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="clientAuthenticationManager"
 		xmlns="http://www.springframework.org/schema/security">
 		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
@@ -84,6 +88,14 @@
 		<property name="authenticationManager" ref="clientAuthenticationManager" />
 	</bean>
 		
+		
+	<http pattern="/me/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/me" access="ROLE_USER,SCOPE_LOCATION" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
 		
 	<http pattern="/location/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
@@ -143,16 +155,27 @@
 	
 	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
 
-		
-
-	<sec:authentication-manager alias="authenticationManager">
-		<sec:authentication-provider>
-			<sec:user-service id="userDetailsService">
-				<sec:user name="marissa" password="koala" authorities="ROLE_USER" />
-				<sec:user name="paul" password="emu" authorities="ROLE_USER" />
-			</sec:user-service>
-		</sec:authentication-provider>
-	</sec:authentication-manager>	
+<!-- 	<sec:authentication-manager alias="authenticationManager"> -->
+<!-- 		<sec:authentication-provider> -->
+<!-- 			<sec:user-service id="userDetailsService"> -->
+<!-- 			    <sec:user name="ddewaele@gmail.com" password="adminadmin" authorities="ROLE_USER" /> -->
+<!-- 				<sec:user name="marissa" password="koala" authorities="ROLE_USER" /> -->
+<!-- 				<sec:user name="paul" password="emu" authorities="ROLE_USER" /> -->
+<!-- 			</sec:user-service> -->
+<!-- 		</sec:authentication-provider> -->
+<!-- 	</sec:authentication-manager> -->
+	
+	<sec:authentication-manager>
+        <sec:authentication-provider>
+            <sec:password-encoder hash="md5">
+            	<sec:salt-source user-property="username"/>    
+			</sec:password-encoder>
+			<sec:jdbc-user-service
+				data-source-ref="dataSource"
+				users-by-username-query="select email, password, registered  from users where email=?"
+				authorities-by-username-query="select email, authority from users where email=?" />
+        </sec:authentication-provider>
+    </sec:authentication-manager>
 		
 	<oauth:authorization-server 
 	    client-details-service-ref="clientDetails" 
@@ -164,7 +187,6 @@
 		<oauth:client-credentials />
 		<oauth:password />
 	</oauth:authorization-server>
- 
 
 	<bean id="userApprovalHandler" class="com.ecs.samples.spring.simple.rest.controller.SimpleUserApprovalHandler">
 		<property name="autoApproveClients">
@@ -175,17 +197,11 @@
 		<property name="tokenServices" ref="tokenServices" />
 	</bean>	
 	
-	
-	
 	<sec:global-method-security pre-post-annotations="enabled" proxy-target-class="true">
 		<sec:expression-handler ref="oauthExpressionHandler" />
 	</sec:global-method-security>
 
 	<oauth:expression-handler id="oauthExpressionHandler" />
 	<oauth:web-expression-handler id="oauthWebExpressionHandler" />
-	
-
-
-	
 	
 </beans>

@@ -455,13 +455,23 @@ You need to setup an authorization-server
 
 ## Insufficient scope
 
-## Error message
+### Error message
 
 HTTP 403 Forbidden occurs when trying to access the API
 
 	{"error":"insufficient_scope","error_description":"Insufficient scope for this resource","scope":"LOCATION"}
 
-## Solution
+### Solution
+
+
+##
+
+### error
+
+org.springframework.beans.factory.parsing.BeanDefinitionParsingException: Configuration problem: No AuthenticationEntryPoint could be established. Please make sure you have a login mechanism configured through the namespace (such as form-login) or specify a custom AuthenticationEntryPoint with the 'entry-point-ref' attribute 
+Offending resource: class path resource [spring-servlet.xml]
+
+
 
 Make sure you provide the correct scopes.. (elaborate(.
 
