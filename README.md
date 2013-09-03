@@ -1,14 +1,25 @@
 #Introduction
 
-Simple project to bootstrap a Spring MVC REST API.
+The goal of this project project is to bootstrap a secure Spring MVC REST API.
+The API included in this project allows for you to manage your locations.
 
-CLone the project, execute `mvn tomcat:run` and go to the following URL:
+It exposes an API that allows you to
 
-http://localhost:6002/com.ecs.samples.spring.simple.rest/helloWorld
+- Update your current location
+- Retrieve your current location
+- Retrieve your location history
+- Update a past location
+- Remove a location (TODO).
+
+See the setup section on how to run the project.
 
 # Setup
 
+This section describes the local setup that is required to run the project. We've tried to kept the dependencies to a minimum.
+
 ## Environment variables
+
+*Optional : * You can export the following environment variables to facilitate testing.
 
 ### Local setup
 	
@@ -19,23 +30,31 @@ http://localhost:6002/com.ecs.samples.spring.simple.rest/helloWorld
 
 ### System properties
 
-	export MAVEN_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=/tmp"
-	mvn tomcat:run
+You can export the following maven options so that the project is statted in debug mode when launched through `mvn tomcat:run`.
+It allows for a very convenient way to test the application.
 
-in windows :
+- on Linux / Unix / Mac OS X
+
+	export MAVEN_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=/tmp"
+
+- on Windows :
 
 	set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=C:/TEMP
 
+### OAuth test
 
-### local oauth data
+There is a Oauth2Test class inclued in the project that allows you to launch an oauth2 flow.
+It pops the browser to handle the authentication / authorization flow, and stores its tokens in the following location:
 
-The Oauth2Test class stores its tokens in the following location:
+	~/.store/oauth2_sample/StoredCredential 
 
-	rm -rf ~/.store/oauth2_sample/StoredCredential 
+In order to remove that local cache, simply remove the folder before running the test again,.
 
+	rm -rf ~/.store/oauth2_sample/StoredCredential
 
+# Spring
 
-# Changes 
+Spring is used heavily in this project. (elaborate) 
 
 ## Spring context
 
@@ -46,10 +65,12 @@ The Oauth2Test class stores its tokens in the following location:
 - Added `<mvc:annotation-driven>` to support for new Spring MVC features such as declarative validation with @Valid, HTTP message conversion with @RequestBody/@ResponseBody, new field conversion architecture, etc
 - Added `<tx:annotation-driven>` to enable the transactional behavior based on annotations.
 
-
 ##EntityManagerFactory
 
-The simplest way to create an EntityManagerFactory bean is to define it like this:
+As we are in the business of storing / retrieving locations we need a persistence layer in place.
+We're using standard JPA inside our Spring container, using Hibernate as the vendor. 
+
+The first thing we need to define is an EntityManagerFactory. The simplest way to create an EntityManagerFactory bean is to define it like this:
 	
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="dataSource" />
@@ -69,9 +90,16 @@ Notice how we point to
 - a persistenceUnitName (points to the pu defined in the persistence.xml)
 - a jpaVendorAdapter (uses the hibernate specific entity manager)
 
+## The datasource
+
+For the moment we're using an embedded database (HSQL). At a later stage this will be replaced with an actual database.
+
+	<jdbc:embedded-database id="dataSource" type="HSQL" />    
+
+
 ## The persistence.xml
 
-This is added in the META-INF folder of the package that holds the Entity classes.
+Notice how the `EntityManagerFactory` points to a `persistenceUnitName`. The `persistenceUnitName` is defined in a `persistence.xml` file that is located in the META-INF folder of the package that holds the Entity classes.
 
 	<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 		<persistence-unit name="spring-jpa">
@@ -79,23 +107,36 @@ This is added in the META-INF folder of the package that holds the Entity classe
 		</persistence-unit>
 	</persistence>
 
-
 ## The transactionManager
+
+We also need a transactionManager for our entityManager. 
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 			<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
-    
-## The datasource
-
-	<jdbc:embedded-database id="dataSource" type="HSQL" />    
-	
 	
 # OAuth2
 
+The REST API used in this project is being secured through Oauth2. This means that in order to access the API you need to be authorized to do so.
+
+Attempting to access the API without being authorized results in the following error
+
+	< HTTP/1.1 401 Unauthorized
+	< Server: Apache-Coyote/1.1
+	< Cache-Control: no-store
+	< Pragma: no-cache
+	< WWW-Authenticate: Bearer realm="sparklr2", error="unauthorized", error_description="An Authentication object was not found in the SecurityContext"
+	< Content-Type: application/json;charset=UTF-8
+	< Transfer-Encoding: chunked
+	< Date: Tue, 03 Sep 2013 07:43:57 GMT
+	< 
+	* Connection #0 to host localhost left intact
+	* Closing connection #0
+	{"error":"unauthorized","error_description":"An Authentication object was not found in the SecurityContext"}
+
 ## web.xml
 
-It's important to realise that all configuration done in the Spring Context is only put into effect if we have the following filter in place. 
+It's important to realize that all configuration done in the Spring Context is only put into effect if we have the following filter in place. 
 
 	<filter>
 		<filter-name>springSecurityFilterChain</filter-name>
@@ -111,7 +152,7 @@ It's important to realise that all configuration done in the Spring Context is o
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
-In order to use Oauth2 in Spring MVC, you require a lot of configuration in the context.
+In order to use Oauth2 in Spring MVC, we require a lot of configuration in the context.
 
 ## Spring Context setup
 
@@ -119,15 +160,18 @@ In order to use Oauth2 in Spring MVC, you require a lot of configuration in the 
 
 The first thing we'll do is list our protected URLs.
 
-
-	<http pattern="/locations/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
+	<http pattern="/location/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
 		<anonymous enabled="false" />
-		<intercept-url pattern="/locations" access="ROLE_USER,SCOPE_READ" />
+		<intercept-url pattern="/location" access="ROLE_USER,SCOPE_LOCATIONHISTORY" />
 		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
 		<access-denied-handler ref="oauthAccessDeniedHandler" />
 	</http>
-
+	
+This means that everyone attempting to access `/location/*` on our REST API will need to be authenticated and authorized to do so.
+We also only allow entities with the role `USER` andd acope `LOCATIONHISTORY` to access this resource.
+	
+	
 Notice how this http definition relies on 
 
 - Authentication Entry Point : Capable of commencing an authentication scheme. If authentication fails and the caller has asked for a specific content type response, this entry point can send one, along with a standard 401 status
@@ -356,3 +400,8 @@ Make sure you provide the correct scopes...
 ## Security
 
 - [Spring OAuth 2 Developers Guide](https://github.com/SpringSource/spring-security-oauth/wiki/oAuth2)
+
+# TODOs
+
+- Remove in-mem-DB with a real DB
+- Look at the http headers of an unauthorized call (realm,.....)
