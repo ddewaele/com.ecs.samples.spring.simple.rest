@@ -171,10 +171,18 @@ The first thing we'll do is list our protected URLs.
 This means that everyone attempting to access `/location/*` on our REST API will need to be authenticated and authorized to do so.
 We also only allow entities with the role `USER` andd acope `LOCATIONHISTORY` to access this resource.
 	
-	
-Notice how this http definition relies on 
+Notice how this `http` definition relies on
 
-- Authentication Entry Point : Capable of commencing an authentication scheme. If authentication fails and the caller has asked for a specific content type response, this entry point can send one, along with a standard 401 status
+- Authentication Entry Point
+- AccessDeniedHandler
+- Custom Filter
+- Access Decision Manager
+
+We'll cover these different components in details in the following sections. 
+
+### Authentication Entry Point
+
+An Authentication Entry Point capable of commencing an authentication scheme. If authentication fails and the caller has asked for a specific content type response, this entry point can send one, along with a standard 401 status
 
 	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
 		<property name="realmName" value="sparklr2" />
@@ -188,17 +196,22 @@ When such an authentication error occurs, this `OAuth2AuthenticationEntryPoint` 
 It will add the `WWW-Authenticate` HTTP header with the following value
  
 	Bearer realm="sparklr2", error="unauthorized", error_description="An Authentication object was not found in the SecurityContext" 
-	
 
-- AccessDeniedHandler : If authorization fails and the caller has asked for a specific content type response, this entry point can send one, along with a standard 403 status. 
+### AccessDeniedHandler
+
+If authorization fails and the caller has asked for a specific content type response, this entry point can send one, along with a standard 403 status. 
 
 	<bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
 
-- Custom Filter : OAuth Resource Server ( = API server used to access the user's information.)
+### Custom Filter
+
+OAuth Resource Server ( = API server used to access the user's information.) is defined by a `resource id` and a `token service`.
 
 	<oauth:resource-server id="resourceServerFilter" resource-id="latifyApi" token-services-ref="tokenServices" />	
 	
-- Access Decision Manager : We also need to define an accessDecisionManager, capable of making a final access control (authorization) decision
+### Access Decision Manager
+
+We also need to define an accessDecisionManager, capable of making a final access control (authorization) decision
 
 This particular one requires  all voters to abstain or grant access.
 
@@ -212,10 +225,12 @@ This particular one requires  all voters to abstain or grant access.
 		</constructor-arg>
 	</bean>
 	
-- TokenService : A Spring provided default implementation of a token service, using random UUID values for the access token and refresh token values
+### TokenService
+
+A Spring provided default implementation of a token service, using random UUID values for the access token and refresh token values
 	
-	The tokenService delegates the persistence of the tokens to a `tokenStore`.
-	To access client specific details it uses a `clientDetailsService`.
+- The tokenService delegates the persistence of the tokens to a `tokenStore`. 
+- To access client specific details it uses a `clientDetailsService`.
 	
 	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 		<property name="tokenStore" ref="tokenStore" />
@@ -223,13 +238,11 @@ This particular one requires  all voters to abstain or grant access.
 		<property name="clientDetailsService" ref="clientDetails" />
 	</bean>	
 
-- TokenStore
+### TokenStore
 
 For this sample we're simply using an in-memory implementation.
 
 	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
-
-
 
 ### Client Details Service
 
@@ -414,4 +427,4 @@ Make sure you provide the correct scopes...
 # TODOs
 
 - Remove in-mem-DB with a real DB
-- Look at the http headers of an unauthorized call (realm,.....)
+- Find out how the AccessDeniedHandler works and how it is triggered.
