@@ -35,11 +35,11 @@ It allows for a very convenient way to test the application.
 
 - on Linux / Unix / Mac OS X
 
-	export MAVEN_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=/tmp"
+		export MAVEN_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=/tmp"
 
 - on Windows :
 
-	set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=C:/TEMP
+		set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=C:/TEMP
 
 ### OAuth test
 
@@ -179,6 +179,16 @@ Notice how this http definition relies on
 	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
 		<property name="realmName" value="sparklr2" />
 	</bean>
+	
+This bean kicks in when things go wrong .... If for example we try to access the API without providing the proper authentication credentials the Spring security framework will throw an `AuthenticationCredentialsNotFoundException`.
+(other examples of exceptions include expired accounts, locked accounts, invalid account credentials,....)
+
+When such an authentication error occurs, this `OAuth2AuthenticationEntryPoint` (that also acts as an ExceptionHandler) will handle the exception by enhancing the response.
+
+It will add the `WWW-Authenticate` HTTP header with the following value
+ 
+	Bearer realm="sparklr2", error="unauthorized", error_description="An Authentication object was not found in the SecurityContext" 
+	
 
 - AccessDeniedHandler : If authorization fails and the caller has asked for a specific content type response, this entry point can send one, along with a standard 403 status. 
 
