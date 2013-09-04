@@ -34,6 +34,11 @@
 				<property name="database" value="HSQL" />
 			</bean>
 		</property>
+		<property name="jpaProperties">
+      		<props>
+        		<prop key="hibernate.hbm2ddl.auto">create</prop>
+        	</props>
+        </property>		
 	</bean>
 	
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
@@ -136,14 +141,11 @@
 		<property name="clientDetailsService" ref="clientDetails" />
 	</bean>
 	
-	<oauth:client-details-service id="clientDetails">
-		<oauth:client client-id="my-trusted-client" authorized-grant-types="password,authorization_code,refresh_token,implicit"
-			secret="somesecret"  authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="location,locationhistory" access-token-validity="60" />
-	</oauth:client-details-service>
+	<bean id="clientDetails" class="org.springframework.security.oauth2.provider.JdbcClientDetailsService">
+      <constructor-arg ref="dataSource" />
+	</bean>
 	
 	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
-
-		
 
 	<sec:authentication-manager alias="authenticationManager">
 		<sec:authentication-provider>
@@ -153,6 +155,7 @@
 			</sec:user-service>
 		</sec:authentication-provider>
 	</sec:authentication-manager>	
+	
 		
 	<oauth:authorization-server 
 	    client-details-service-ref="clientDetails" 
