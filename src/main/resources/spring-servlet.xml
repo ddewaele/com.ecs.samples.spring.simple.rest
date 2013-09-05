@@ -91,6 +91,14 @@
 		<property name="authenticationManager" ref="clientAuthenticationManager" />
 	</bean>
 		
+
+	<http pattern="/user/list" create-session="stateless" 
+		xmlns="http://www.springframework.org/schema/security">
+		<intercept-url pattern="/user/list"  access="ROLE_ADMIN" />
+		<anonymous enabled="false" />
+		<http-basic />
+	</http>
+
 		
 	<http pattern="/me/**" create-session="never" entry-point-ref="oauthAuthenticationEntryPoint"
 		access-decision-manager-ref="accessDecisionManager" xmlns="http://www.springframework.org/schema/security">
@@ -197,5 +205,13 @@
 
 	<oauth:expression-handler id="oauthExpressionHandler" />
 	<oauth:web-expression-handler id="oauthWebExpressionHandler" />
+
+	<bean id="abstractCachingViewResolver"  class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+	</bean>
+	
+	<mvc:resources mapping="/resources/**" location="/resources/" />
 	
 </beans>

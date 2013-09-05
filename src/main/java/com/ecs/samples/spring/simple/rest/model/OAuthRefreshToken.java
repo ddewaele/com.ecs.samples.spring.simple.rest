@@ -1,5 +1,6 @@
 package com.ecs.samples.spring.simple.rest.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
@@ -10,7 +11,8 @@ import javax.persistence.Table;
 public class OAuthRefreshToken {
 
 	@Id
-	private String token_id;
+	@Column(name="token_id")
+	private String id;
 
 	@Lob
 	private byte[] token;
@@ -18,12 +20,12 @@ public class OAuthRefreshToken {
 	@Lob
 	private byte[] authentication;
 
-	public String getToken_id() {
-		return token_id;
+	public String getId() {
+		return id;
 	}
 
-	public void setToken_id(String token_id) {
-		this.token_id = token_id;
+	public void setId(String token_id) {
+		this.id = token_id;
 	}
 
 	public byte[] getToken() {
@@ -44,7 +46,7 @@ public class OAuthRefreshToken {
 
 	@Override
 	public String toString() {
-		return "OAuthRefreshToken [token_id=" + token_id + "]";
+		return "OAuthRefreshToken [token_id=" + id + "]";
 	}
 
 }

@@ -13,6 +13,20 @@ It exposes an API that allows you to
 
 See the setup section on how to run the project.
 
+The project also contains some administrative pages:
+
+User overview
+
+![User overview](https://dl.dropboxusercontent.com/u/13246619/Blog%20Articles/SpringOAuth/users.PNG)
+
+Token overview
+
+![Token overview](https://dl.dropboxusercontent.com/u/13246619/Blog%20Articles/SpringOAuth/tokens.PNG)
+
+Oauth Client overview
+
+TODO : create CRUD pages for registering oauth clients.
+
 # Setup
 
 This section describes the local setup that is required to run the project. We've tried to kept the dependencies to a minimum.
