@@ -92,9 +92,8 @@
 	</bean>
 		
 
-	<http pattern="/user/list" create-session="stateless" 
-		xmlns="http://www.springframework.org/schema/security">
-		<intercept-url pattern="/user/list"  access="ROLE_ADMIN" />
+	<http pattern="/user/*" create-session="stateless" xmlns="http://www.springframework.org/schema/security">
+		<intercept-url pattern="/user/*"  access="ROLE_ADMIN" />
 		<anonymous enabled="false" />
 		<http-basic />
 	</http>

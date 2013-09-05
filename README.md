@@ -1,6 +1,14 @@
 #Introduction
 
-The goal of this project project is to bootstrap a secure Spring MVC REST API.
+The goal of this project project is to bootstrap a secure Spring MVC REST API. 
+
+The project contains 
+
+- a simple OAuth2 secured REST API acting as an example.
+- a set of administrative pages 
+
+##OAuth2 Secured API
+ 
 The API included in this project allows for you to manage your locations.
 
 It exposes an API that allows you to
@@ -11,23 +19,34 @@ It exposes an API that allows you to
 - Update a past location
 - Remove a location (TODO).
 
-See the setup section on how to run the project.
+The project also contains a set of administrative pages allowing you look at information about the registered users and issues tokens.
 
+##Administrative pages
 The project also contains some administrative pages:
 
-User overview
+###User overview
+
+The user overview can be accessed via the following URL:
+
+	http://localhost:6002/com.ecs.samples.spring.simple.rest/user/list.html
+
+Screenshot:
 
 ![User overview](https://dl.dropboxusercontent.com/u/13246619/Blog%20Articles/SpringOAuth/users.PNG)
 
-Token overview
+###Token overview
+
+The token overview can be accessed via the following URL:
+
+	http://localhost:6002/com.ecs.samples.spring.simple.rest/accesstoken/list.html
 
 ![Token overview](https://dl.dropboxusercontent.com/u/13246619/Blog%20Articles/SpringOAuth/tokens.PNG)
 
-Oauth Client overview
+###Oauth Client overview
 
 TODO : create CRUD pages for registering oauth clients.
 
-# Setup
+# Project Setup
 
 This section describes the local setup that is required to run the project. We've tried to kept the dependencies to a minimum.
 
@@ -55,9 +74,9 @@ It allows for a very convenient way to test the application.
 
 		set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=C:/TEMP
 
-### OAuth test
+# Testing
 
-There is a Oauth2Test class inclued in the project that allows you to launch an oauth2 flow.
+There is a Oauth2Test class included in the project that allows you to launch an oauth2 flow.
 It pops the browser to handle the authentication / authorization flow, and stores its tokens in the following location:
 
 	~/.store/oauth2_sample/StoredCredential 
@@ -68,7 +87,7 @@ In order to remove that local cache, simply remove the folder before running the
 
 # Spring
 
-Spring is used heavily in this project. (elaborate) 
+Spring Security is the core framework used by this project. 
 
 ## Spring context
 
@@ -671,3 +690,9 @@ Make sure you provide the correct scopes.. (elaborate(.
 
 - Remove in-mem-DB with a real DB
 - Find out how the AccessDeniedHandler works and how it is triggered.
+
+# Notes
+
+Distributed / lightweight systems & services
+
+REST / HTTP / JSON 
