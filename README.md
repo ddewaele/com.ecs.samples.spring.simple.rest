@@ -13,19 +13,20 @@ The API included in this project allows for you to manage your locations.
 
 It exposes an API that allows you to
 
-- Update your current location
 - Retrieve your current location
+- Update your current location
 - Retrieve your location history
-- Update a past location
+- Retrieve a past location
+- Add past locations
 - Remove a location (TODO).
 
-### Updating your current location
+### Retrieve current location
 
 We can access our current location by accessing the `current location endpoint` with a `GET` request
 
 	curl --silent "${current_location_endpoint}"
 
-##@ Update current location
+### Update current location
 
 We can update our current location with a `POST` request on the `current location endpoint`. 
 We need to provide a JSON payload containing (at least) the latitude and longitude.
