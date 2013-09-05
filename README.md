@@ -19,10 +19,8 @@ It exposes an API that allows you to
 - Update a past location
 - Remove a location (TODO).
 
-The project also contains a set of administrative pages allowing you look at information about the registered users and issues tokens.
-
 ##Administrative pages
-The project also contains some administrative pages:
+The project also contains a set of administrative pages allowing you look at information about the registered users and issues tokens.
 
 ###User overview
 
@@ -76,8 +74,39 @@ It allows for a very convenient way to test the application.
 
 # Testing
 
-There is a Oauth2Test class included in the project that allows you to launch an oauth2 flow.
-It pops the browser to handle the authentication / authorization flow, and stores its tokens in the following location:
+## Oauth2Test 
+
+There is a Oauth2Test class included in the project that allows you to launch an OAuth2 flow. It's not a completely automated test and it does require user-input.
+It even goes as far as starting a browser so that the user can login and authorize our application.  
+
+### Login page
+
+If the user is not authenticated, he'll need to provide the proper security credentials
+
+![Login](https://dl.dropboxusercontent.com/u/13246619/Blog%20Articles/SpringOAuth/login.png)	
+
+If authentication is succesfull, the user will be redirected to the authorization page
+
+### Authorization page
+
+After having logged in, the user needs to authorize our application (our client the `my-trusted-client`) to access his data.
+
+![Authorization](https://dl.dropboxusercontent.com/u/13246619/Blog%20Articles/SpringOAuth/authorize.png)	
+
+The page URL is the OAuth2 authorization URL, As you can see if passes a number of parameters including
+
+-client id
+-redirect uri
+-response type
+-scope
+	
+The full URL looks like this	
+	
+	http://localhost:6002/com.ecs.samples.spring.simple.rest/oauth/authorize?client_id=my-trusted-client&redirect_uri=http://localhost:64938/Callback&response_type=code&scope=location%20
+
+### Tokens
+
+The test stores its tokens in the following location:
 
 	~/.store/oauth2_sample/StoredCredential 
 
