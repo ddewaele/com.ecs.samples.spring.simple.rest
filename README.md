@@ -20,6 +20,20 @@ It exposes an API that allows you to
 - Add past locations
 - Remove a location (TODO).
 
+Notice that in order to execute these calls you need to provide a valid access token. (More on that later).
+
+The access token is a `String` that can be passed in the `Authorization` header of the request as a `bearer token`. Performing such a request using `curl` looks like this:
+
+	curl -H "Authorization: Bearer 1/fFBGRNJru1FQd44AzqT3Zg" https://www.googleapis.com/oauth2/v1/userinfo
+
+All non-authorized calls will return the following JSON string
+
+	{	"error":"unauthorized",
+		"error_description":"An Authentication object was not found in the SecurityContext"
+	} 
+
+Note that the curl samples below don't contain the authorization header for simplicity.
+
 ### Retrieve current location
 
 We can access our current location by accessing the `current location endpoint` with a `GET` request
