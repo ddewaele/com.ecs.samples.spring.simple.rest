@@ -19,6 +19,39 @@ It exposes an API that allows you to
 - Update a past location
 - Remove a location (TODO).
 
+### Updating your current location
+
+We can access our current location by accessing the `current location endpoint` with a `GET` request
+
+	curl --silent "${current_location_endpoint}"
+
+##@ Update current location
+
+We can update our current location with a `POST` request on the `current location endpoint`. 
+We need to provide a JSON payload containing (at least) the latitude and longitude.
+ 
+	curl --silent  -H "Content-Type: application/json" -d '{"latitude":1.0,"longitude":1.0}' -X POST ${current_location_endpoint}
+
+### Retrieving location history
+
+We can retrieve our location history as a list of location resources through the `location endpoint` with a `GET` request.
+
+	curl --silent "${location_endpoint}"
+	
+If we know the exact timestamp of a location we can go ahead and fetch that single location from the past.
+	
+	curl --silent "${location_endpoint}/1378113390550"
+
+We can also provide a `min-time` and `max-time` parameter to define a start and end time.
+	
+	curl --silent "${location_endpoint}/?min-time=1378111961098&max-time=1378111963779"
+
+## Add past locations
+
+Adding locations in the past is also possible using by performing a `POST` request on the `location endpoint`.
+
+	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":10.0,"longitude":10.0,"speed":null,"timestampMs":1378112866695}' -X POST ${location_endpoint}
+
 ##Administrative pages
 The project also contains a set of administrative pages allowing you look at information about the registered users and issues tokens.
 
@@ -488,43 +521,7 @@ We'll also provide an `import.sql` file to provision the table that is used by t
 	
 	
 	
-# Testing
 
-## Current locations
-
-### Retrieving current location
-	curl --silent "${current_location_endpoint}"
-
-## Update current location 
-
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":1.0,"longitude":1.0}' -X POST ${current_location_endpoint}
-	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":2.0,"longitude":2.0}' -X POST ${current_location_endpoint}
-	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":3.0,"longitude":3.0}' -X POST ${current_location_endpoint}
-	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":4.0,"longitude":4.0}' -X POST ${current_location_endpoint}
-
-## Retrieving location history
-
-	curl --silent "${location_endpoint}"
-	curl --silent "${location_endpoint}/1378113390550"
-	
-	curl --silent "${location_endpoint}/?min-time=1378111961098&max-time=1378111963779"
-
-## Add past locations
-
-
-	
-
-	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":10.0,"longitude":10.0,"speed":null,"timestampMs":1378112866695}' -X POST ${location_endpoint}
-	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":20.0,"longitude":20.0,"speed":null,"timestampMs":1378112869730}' -X POST ${location_endpoint}
-	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":30.0,"longitude":30.0,"speed":null,"timestampMs":1378112872770}' -X POST ${location_endpoint}
-	sleep 1
-	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":40.0,"longitude":40.0,"speed":null,"timestampMs":1378113390550}' -X POST ${location_endpoint}
-	sleep 1
 
 
 # Errors occured
@@ -725,3 +722,10 @@ Make sure you provide the correct scopes.. (elaborate(.
 Distributed / lightweight systems & services
 
 REST / HTTP / JSON 
+
+
+
+Resource owner ( the user)
+Resource server
+Authorization Server
+Client application
