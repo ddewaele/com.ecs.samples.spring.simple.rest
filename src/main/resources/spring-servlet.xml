@@ -79,10 +79,13 @@
 		<property name="typeName" value="Basic" />
 	</bean>
 	
+	<sec:debug/>
 	<sec:authentication-manager id="clientAuthenticationManager">
 		<sec:authentication-provider user-service-ref="clientDetailsUserService" />
 	</sec:authentication-manager>
 	
+	
+	<!-- This UserDetailsService is only used to lookup Oauth2 Clients, not actual users. -->
 	<bean id="clientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
 		<constructor-arg ref="clientDetails" />
 	</bean>
@@ -172,6 +175,7 @@
             	<sec:salt-source user-property="username"/>    
 			</sec:password-encoder>
 			<sec:jdbc-user-service
+			    id="jdbcUserDetailsService"
 				data-source-ref="dataSource"
 				users-by-username-query="select email, password, registered  from users where email=?"
 				authorities-by-username-query="select email, authority from users where email=?" />

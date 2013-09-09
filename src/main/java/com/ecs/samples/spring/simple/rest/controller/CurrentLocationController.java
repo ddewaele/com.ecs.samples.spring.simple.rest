@@ -1,15 +1,15 @@
 package com.ecs.samples.spring.simple.rest.controller;
 
+import java.security.Principal;
+
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,8 +27,6 @@ import com.ecs.samples.spring.simple.rest.repository.UserRepository;
 public class CurrentLocationController {
 
 	private static final String APPLICATION_JSON = "application/json";
-
-	private static final String SQL_CURRENT_LOCATION = "SELECT l FROM Location l order by l.timestampMs DESC";
 
 	final Logger logger = LoggerFactory.getLogger(CurrentLocationController.class);
 	
@@ -50,10 +48,10 @@ public class CurrentLocationController {
 	
 	@Transactional
 	@RequestMapping(method=RequestMethod.POST,consumes = APPLICATION_JSON,produces= APPLICATION_JSON)
-	public @ResponseBody Location updateCurrentLocation(@RequestBody Location location) {
-		logger.info("Entering method with location " + location);
+	public @ResponseBody Location updateCurrentLocation(@RequestBody Location location,Principal principal) {
 		long currentTimeMillis = System.currentTimeMillis();
 		location.setTimestampMs(currentTimeMillis);
+		location.setUserName(principal.getName());
 		logger.info("Saving location " + location);
 		em.persist(location);
 		em.flush();
@@ -61,12 +59,10 @@ public class CurrentLocationController {
 	}
 	
 	@RequestMapping(method=RequestMethod.GET,produces= APPLICATION_JSON)
-	public @ResponseBody Location getCurrentLocation() {
-		logger.info("Finding current location");
-		String sql = SQL_CURRENT_LOCATION;
+	public @ResponseBody Location getCurrentLocation(Principal principal) {
 		Location location = null;
 		try {
-			location = (Location) em.createQuery(sql).setMaxResults(1).getSingleResult();
+			location = getLocationByPrincipal(principal);
 			logger.info("Found current location = " + location);	
 		} catch (NoResultException ex) {
 			location = new Location();
@@ -75,5 +71,18 @@ public class CurrentLocationController {
 		
 		return location;
 	}
+	
+	
+	private Location getLocationByPrincipal(Principal principal) {
+		Location locationFromDb;
+		TypedQuery<Location> query = em.createNamedQuery("Location.findByUser", Location.class).setParameter("userName", principal.getName()).setMaxResults(1);
+		
+		try {
+			locationFromDb = query.getSingleResult();
+		} catch (NoResultException ex) {
+			locationFromDb = null;
+		}
+		return locationFromDb;
+	}	
 
 }

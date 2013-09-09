@@ -20,7 +20,9 @@ It exposes an API that allows you to
 - Add past locations
 - Remove a location (TODO).
 
-Notice that in order to execute these calls you need to provide a valid access token. (More on that later).
+### OAuth2 Bearer Tokens
+
+In order to execute these REST calls you need to provide a valid access token. (More on that later).
 
 The access token is a `String` that can be passed in the `Authorization` header of the request as a `bearer token`. Performing such a request using `curl` looks like this:
 
@@ -45,7 +47,11 @@ We can access our current location by accessing the `current location endpoint` 
 We can update our current location with a `POST` request on the `current location endpoint`. 
 We need to provide a JSON payload containing (at least) the latitude and longitude.
  
-	curl --silent  -H "Content-Type: application/json" -d '{"latitude":1.0,"longitude":1.0}' -X POST ${current_location_endpoint}
+	curl --silent  -H "Content-Type: application/json" -d '{"latitude":1.0,"longitude":1.0}' -X POST http://localhost:6002/com.ecs.samples.spring.simple.rest/currentLocation
+
+
+curl --silent -H "Authorization: Bearer c9adf323-ef57-400f-8a23-0a5f529e3a47" -H "Content-Type: application/json" -d '{"latitude":1.0,"longitude":1.0}' -X POST http://localhost:6002/com.ecs.samples.spring.simple.rest/currentLocation
+
 
 ### Retrieving location history
 
@@ -65,14 +71,14 @@ We can also provide a `min-time` and `max-time` parameter to define a start and 
 
 Adding locations in the past is also possible using by performing a `POST` request on the `location endpoint`.
 
-	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":10.0,"longitude":10.0,"speed":null,"timestampMs":1378112866695}' -X POST ${location_endpoint}
+	curl --silent  -H "Content-Type: application/json" -d '{"accuracy":null,"altitude":null,"altitudeAccuracy":null,"heading":null,"latitude":10.0,"longitude":10.0,"speed":null,"timestampMs":1378112866695}' -X POST http://localhost:6002/com.ecs.samples.spring.simple.rest/location
 
 ##Administrative pages
 The project also contains a set of administrative pages allowing you look at information about the registered users and issues tokens.
 
 ###User overview
 
-The user overview can be accessed via the following URL:
+The [user overview](http://localhost:6002/com.ecs.samples.spring.simple.rest/user/list.html) can be accessed via the following URL:
 
 	http://localhost:6002/com.ecs.samples.spring.simple.rest/user/list.html
 
@@ -109,7 +115,7 @@ This section describes the local setup that is required to run the project. We'v
 
 ### System properties
 
-You can export the following maven options so that the project is statted in debug mode when launched through `mvn tomcat:run`.
+You can export the following maven options so that the project is started in debug mode when launched through `mvn tomcat:run`.
 It allows for a very convenient way to test the application.
 
 - on Linux / Unix / Mac OS X
@@ -119,6 +125,21 @@ It allows for a very convenient way to test the application.
 - on Windows :
 
 		set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -DlogFileLocation=C:/TEMP
+
+
+# Debugging
+
+You can turn on Spring Security Debugging by adding the `debug` component in your spring context.
+
+	2013-09-07 00:55:10,635 WARN  Spring Security Debugger - 
+	
+	********************************************************************
+	**********        Security debugging is enabled.       *************
+	**********    This may include sensitive information.  *************
+	**********      Do not use in a production system!     *************
+	********************************************************************
+
+
 
 # Testing
 
@@ -161,6 +182,36 @@ The test stores its tokens in the following location:
 In order to remove that local cache, simply remove the folder before running the test again,.
 
 	rm -rf ~/.store/oauth2_sample/StoredCredential
+
+You can create an alias for that command to save you some typing.
+
+	alias clear_tokens='rm -rf ~/.store/oauth2_sample/StoredCredential'
+
+## Using CURL
+
+If you want to use curl to perform authorized calls you need to provide an OAuth2 Bearer Access Token.
+We can again make this a bit easier for you by defining an alias like this :
+
+	alias acurl='curl -H "Authorization: Bearer ${access_token}" $1'
+	
+That way, all you need to provide is an `access_token` like this:
+
+	access_token=0e635793-c48e-483d-91cf-27c37f02c398
+
+And call the secured url like this
+
+	curl http://localhost:6002/com.ecs.samples.spring.simple.rest/whoami
+
+IF all gors well you should get a response like this:
+
+	{"password":"2a634b10e5c2b645008098465cce659c",
+	"username":"ddewaele@gmail.com",
+	"authorities":[{"authority":"ROLE_USER"}],
+	"accountNonExpired":true,
+	"accountNonLocked":true,
+	"credentialsNonExpired":true,
+	"enabled":true}
+
 
 # Spring
 
@@ -205,7 +256,6 @@ Notice how we point to
 For the moment we're using an embedded database (HSQL). At a later stage this will be replaced with an actual database.
 
 	<jdbc:embedded-database id="dataSource" type="HSQL" />    
-
 
 ## The persistence.xml
 
@@ -534,9 +584,102 @@ We'll also provide an `import.sql` file to provision the table that is used by t
 
 	INSERT INTO OAUTH_CLIENT_DETAILS (client_id,client_secret,resource_ids,scope,authorized_grant_types,web_server_redirect_uri,authorities,access_token_validity,refresh_token_validity,additional_information) VALUES ('my-trusted-client','somesecret',null,'location,locationhistory','password,authorization_code,refresh_token,implicit',null,'ROLE_CLIENT, ROLE_TRUSTED_CLIENT',60,null,null);
 	
-	
-	
+# Accessing the user
 
+## The UserDetailsManager
+
+We can inject a `UserDetailsManager` into any controller like this :
+
+	@Resource(name="jdbcUserDetailsService")
+	private UserDetailsManager userDetailsService;
+	
+As we're using multiple UserDetailsManager types in our config, we're targetting a specific userDetailsService by name here. (the one capable of retrieving user details). 
+
+Remember that we also had a UserDetailsService specifically for looking up Oauth2 Clients.
+
+	<!-- This UserDetailsService is only used to lookup Oauth2 Clients, not actual users. -->
+	<bean id="clientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
+		<constructor-arg ref="clientDetails" />
+	</bean> 	
+
+The UserDetailsManager allows us to access the `User` or `UserDetails` object
+
+
+I'v created a very simple `whoami` request in the ServiceUserController
+
+	@RequestMapping("/whoami")
+	@Controller
+	public class ServiceUserController {
+	
+		@Resource(name="jdbcUserDetailsService")
+		private UserDetailsManager userDetailsService;
+		
+		@ResponseBody
+		@RequestMapping("")
+		public UserDetails getPhotoServiceUser(Principal principal)
+		{
+			UserDetails userDetails = userDetailsService.loadUserByUsername(principal.getName());
+			return userDetails;
+		}
+	} 
+
+When invoked like this:
+
+	curl -H "Authorization: Bearer 1f3b2699-2dd5-4a5e-8575-0d72c6aa3fbd" http://localhost:6002/com.ecs.samples.spring.simple.rest/whoami
+	
+It will return the UserDetails object
+
+{"password":"2a634b10e5c2b645008098465cce659c","username":"ddewaele@gmail.com","authorities":[{"authority":"ROLE_USER"}],"accountNonExpired":true,"accountNonLocked":true,"credentialsNonExpired":true,"enabled":true}
+
+
+## The injected principal
+
+Spring can automatically inject the Principal if one is provided as an argument to a REST function 
+
+	org.springframework.security.core.userdetails.User@73ffe800: 
+		Username: ddewaele@gmail.com; 
+		Password: [PROTECTED]; 
+		Enabled: true; 
+		AccountNonExpired: true; 
+		credentialsNonExpired: true; 
+		AccountNonLocked: true; 
+		Granted Authorities: ROLE_USER; 
+		Credentials: [PROTECTED]; 
+		Authenticated: true; 
+		Details: remoteAddress=0:0:0:0:0:0:0:1%0, , 
+		tokenValue=<TOKEN>; 
+		Granted Authorities: ROLE_USER
+
+So if you have a method like this, the Principal will be made available by Spring.
+
+	@Transactional
+	@RequestMapping(method=RequestMethod.POST,consumes = APPLICATION_JSON,produces= APPLICATION_JSON)
+	public @ResponseBody Location updateCurrentLocation(@RequestBody Location location,Principal principal) {
+		....
+	}
+
+## The Security Context
+
+You can also get a hold of an Authentication object. 
+
+	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+The authentication object contains the same principal as the one we saw when we added the Principal argument to our methods. 
+
+	org.springframework.security.oauth2.provider.OAuth2Authentication@4e3c521f: 
+		Principal: org.springframework.security.core.userdetails.User@73ffe800: 
+			Username: ddewaele@gmail.com; 
+			Password: [PROTECTED]; 
+			Enabled: true; 
+			AccountNonExpired: true; 
+			credentialsNonExpired: true; 
+			AccountNonLocked: true; 
+			\Granted Authorities: ROLE_USER; 
+			Credentials: [PROTECTED]; 
+			Authenticated: true; 
+			Details: remoteAddress=0:0:0:0:0:0:0:1%0, , 
+			tokenValue=<TOKEN>; 
+			Granted Authorities: ROLE_USER
 
 
 # Errors occured
@@ -744,3 +887,48 @@ Resource owner ( the user)
 Resource server
 Authorization Server
 Client application
+	is the client_id / client_secret
+	
+
+
+Presenting the bearer token.
+I bear the token
+
+what happens when the resource server receives the bearer token
+
+
+echo $TOKEN | cut -d '.' -f 2 | base64 -d
+
+
+Ideas for a screencast
+Howto build up
+
+1. describe the REST API
+	do some curl calls
+	
+2. start protecting your url
+	get the dependencies sorted out
+	
+	
+	
+Why is all of this going through the filters
+
+Request received for '/resources/images/forward_disabled.png':
+
+org.apache.catalina.connector.RequestFacade@767ebd7d
+
+servletPath:/resources/images/forward_disabled.png
+pathInfo:null
+
+Security filter chain: [
+  SecurityContextPersistenceFilter
+  LogoutFilter
+  UsernamePasswordAuthenticationFilter
+  RequestCacheAwareFilter
+  SecurityContextHolderAwareRequestFilter
+  AnonymousAuthenticationFilter
+  SessionManagementFilter
+  ExceptionTranslationFilter
+  FilterSecurityInterceptor
+]
+	

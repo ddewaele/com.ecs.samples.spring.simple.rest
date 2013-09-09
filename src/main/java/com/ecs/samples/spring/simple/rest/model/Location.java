@@ -1,12 +1,22 @@
 package com.ecs.samples.spring.simple.rest.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 import com.google.api.client.util.Key;
 
 @Entity
+@NamedQueries(value= { 	@NamedQuery(name = "Location.findByUser", query = "from Location l where l.userName= :userName order by l.timestampMs DESC"),
+                      	@NamedQuery(name = "Location.findByUserAndTimeStamp", query = "from Location l where l.userName= :userName and l.timestampMs= :timestampMs")})
 public class Location {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Integer id;
 	
 	@Key
 	private Integer accuracy;
@@ -30,8 +40,9 @@ public class Location {
 	private Double speed;
 	
 	@Key
-	@Id
 	private Long timestampMs;
+	
+	private String userName;
 	
 	public Location() {
 	}
@@ -39,6 +50,14 @@ public class Location {
 	public Location(Double latitude,Double longitude) {
 		this.latitude=latitude;
 		this.longitude=longitude;
+	}
+	
+	public Integer getId() {
+		return id;
+	}
+	
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public Integer getAccuracy() {
@@ -104,6 +123,14 @@ public class Location {
 	public void setTimestampMs(Long timestampMs) {
 		this.timestampMs = timestampMs;
 	}
+	
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String username) {
+		this.userName = username;
+	}	
 
 	@Override
 	public String toString() {

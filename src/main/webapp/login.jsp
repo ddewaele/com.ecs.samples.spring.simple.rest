@@ -13,32 +13,31 @@
 
 	<div id="content">
 		<c:if test="${not empty param.authentication_error}">
-			<h1>Woops!</h1>
+			<h1>Authentication Error</h1>
 			<p class="error">Your login attempt was not successful.</p>
 		</c:if>
 		<c:if test="${not empty param.authorization_error}">
-			<h1>Woops!</h1>
+			<h1>Authorization Error</h1>
 			<p class="error">You are not permitted to access that resource.</p>
 		</c:if>
 
 		<h2>Login</h2>
 
-		<form id="loginForm" name="loginForm"
-			action="<c:url value="/login.do"/>" method="post">
+		<form id="loginForm" name="loginForm" action="<c:url value="/login.do"/>" method="post">
 			<p>
-				<label>Username: <input type='text' name='j_username'
-					value="ddewaele@gmail.com" /></label>
+				<label>Username: 
+					<input type='text' name='j_username' value="ddewaele@gmail.com" />
+				</label>
 			</p>
 			<p>
-				<label>Password: <input type='text' name='j_password'
-					value="adminadmin" /></label>
+				<label>Password: 
+					<input type='text' name='j_password' value="adminadmin" />
+				</label>
 			</p>
-
 			<p>
 				<input name="login" value="Login" type="submit"/>
 			</p>
 		</form>
 	</div>
-
 </body>
 </html>
